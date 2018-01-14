@@ -30,6 +30,8 @@ ApplicationWindow {
 	}
 
 	Rectangle {
+		// line in the middle
+		// handles input
 		focus: true
 		Keys.onPressed: {
 			if (event.key == Qt.Key_W) {
@@ -67,6 +69,7 @@ ApplicationWindow {
 		color: "grey"
 	}
 	Text {
+		id: scoreLeft
 		color: "grey"
 		anchors.topMargin: window.height/15
 		anchors.top: parent.top
@@ -77,6 +80,7 @@ ApplicationWindow {
 		text: "97"
 	}
 	Text {
+		id: scoreRight
 		color: "grey"
 		anchors.topMargin: window.height/15
 		anchors.top: parent.top
@@ -97,7 +101,6 @@ ApplicationWindow {
 		ParallelAnimation {
 			id: moveBall
 			PropertyAnimation {
-				//id: moveBall
 				target: ball
 				properties: "x"
 				to: rel_to_abs_x(frame.to_x)
@@ -110,9 +113,11 @@ ApplicationWindow {
 				duration: frame.time
 			}
 			onRunningChanged: {
+				frame.change()
 				if (!moveBall.running) {
+					frame.stoped()
 					to: frame.bounce(abs_to_rel_x(ball.x), abs_to_rel_y(ball.y))
-					moveBall.start()
+					//moveBall.start()
 				}
 			}
 		}
@@ -122,8 +127,8 @@ ApplicationWindow {
 		anchors.leftMargin: 10
 		anchors.right: parent.right
 		y: right.pos*(window.height/100) - height/2
-		width: 25
-		height: (window.height * 3)/10
+		width: window.width/70
+		height: 2 * right.size * (window.height/100)
 		color: "black"
 	}
 	Rectangle {
@@ -131,18 +136,20 @@ ApplicationWindow {
 		anchors.rightMargin: 10
 		anchors.left: parent.left
 		y: left.pos*(window.height/100) - height/2
-		width: 25
-		height: (window.height * 3)/10
+		width: window.width/70
+		height: 2 * left.size * (window.height/100)
 		color: "green"
 	}
 	Paddle {
 		id: right
 		pos: 50
+		size: 15
 		onMove: paddleRight.y = pos*(window.height/100) - paddleRight.height/2
 	}
 	Paddle {
 		id: left
 		pos: 50
+		size: 15
 		onMove: {
 			paddleLeft.y = pos*(window.height/100) - paddleLeft.height/2
 			moveBall.start()
@@ -154,5 +161,10 @@ ApplicationWindow {
 		rightPaddle: right
 		height: window.height
 		width: window.width
+		onRunBall: {
+			//ball.x = rel_to_abs_x(50)
+			//ball.y = rel_to_abs_y(50)
+			moveBall.start()
+		}
 	}
 }
