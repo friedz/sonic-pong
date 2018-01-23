@@ -113,10 +113,9 @@ ApplicationWindow {
 				duration: frame.time
 			}
 			onRunningChanged: {
-				frame.change()
 				if (!moveBall.running) {
 					frame.stoped()
-					to: frame.bounce(abs_to_rel_x(ball.x), abs_to_rel_y(ball.y))
+					frame.bounce(abs_to_rel_x(ball.x), abs_to_rel_y(ball.y))
 					//moveBall.start()
 				}
 			}
@@ -142,12 +141,17 @@ ApplicationWindow {
 	}
 	Paddle {
 		id: right
+		side: -1
 		pos: 50
 		size: 15
-		onMove: paddleRight.y = pos*(window.height/100) - paddleRight.height/2
+		onMove: {
+			paddleRight.y = pos*(window.height/100) - paddleRight.height/2
+			moveBall.start()
+		}
 	}
 	Paddle {
 		id: left
+		side: 1
 		pos: 50
 		size: 15
 		onMove: {
@@ -165,6 +169,7 @@ ApplicationWindow {
 			//ball.x = rel_to_abs_x(50)
 			//ball.y = rel_to_abs_y(50)
 			moveBall.start()
+			count = count + 1
 		}
 	}
 }

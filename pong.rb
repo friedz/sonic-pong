@@ -5,15 +5,15 @@ require 'qml'
 module Pong
 	VERSION = "1.0"
 	include QML::Access
-	#register_to_qml under: "Pong", version: "1.0"
 
 	class Ball
-		include QML::Access
-		register_to_qml
-		def initialize a, b, direction
+		#include QML::Access
+		#register_to_qml
+		def initialize a, b, direction, frame
 			@a = a
 			@b = b
 			@direction = direction
+			@frame = frame
 		end
 		def reset
 			@a = 0
@@ -49,44 +49,55 @@ module Pong
 			end
 		end
 		def y
-			puts "#{@a} * #{x()} + #{@b}"
+			puts "#{@a} * #{x()} + #{@b} = #{x() * @a + @b}"
 			x() * @a + @b
 		end
 		def line
 		end
 		def bounce(x, y)
-			#if @last_x == x and @last_y == y then
-			#	return
+			#change = if 0 == @direction then
+			#						@frame.leftPaddle.collision y
+			#				 else
+			#						@frame.rightPaddle.collision y
+			#				 end
+			#if change.nil? then
+			#	puts "reset"
+			#	change = 0
 			#end
-			#@last_x = x
-			#@last_y = y
-			if y == 0 then
+			if y.round == 0 then
 				@a = -@a
 				@b = -@b
-			elsif y == 100 then
+				# @direction = @direction
+			elsif y.round == 100 then
 				@a = -@a
 				@b = 2*100 - @b
-			elsif x == 0 then
+				# @direction = @direction
+			elsif x.round == 0 then
 				# @b = @b
-				# @a = @a
+				@a = -@a
+				@a += @frame.leftPaddle.collision y
 				@direction = 100
-			elsif x == 100 then
+			elsif x.round == 100 then
 				@b = (2 * y) - @b
-				# @a = @a
+				@a = -@a
+				@a += @frame.rightPaddle.collision y
 				@direction = 0
 			end
+			#@a += change
 			puts "Ball.bounce(#{x}, #{y})"
 		end
 	end
 
 	class Paddle
 		attr_reader :size, :pos
+		#attr_accessor :side
 
 		include QML::Access
 		register_to_qml
 
 		property(:pos) { 50 }
 		property(:size) { 15 }
+		property(:side) { 0 }
 
 		signal :move, []
 
@@ -96,7 +107,20 @@ module Pong
 			puts "Paddle.new"
 			@mutex ||= Mutex.new
 		end
-
+		def collision y
+			puts "collision #{y} (size: #{self.size})"
+			diff = y - pos
+			if diff.abs > self.size then
+				#return nil
+				puts "score"
+				return 0
+			#elsif diff < 0 then
+			elsif 0 == diff then
+				return 0
+			else
+				return self.side * diff/self.size
+			end
+		end
 		def up
 			@movement = :up
 			unless @mutex.locked?
@@ -153,6 +177,7 @@ module Pong
 		property(:to_x) { 100 }
 		property(:to_y) { 50 }
 		property(:time) { 2000 }
+		property(:count) { 0 }
 
 		signal :runBall, []
 
@@ -177,48 +202,13 @@ module Pong
 			@last_x = x
 			@last_y = y
 			#puts "X: #{x} Y: #{y} Win: #{self.width}x#{self.height}"
-			puts "X: #{x} Y: #{y}"
-			@ball.bounce(x, y)
+			#puts "X: #{x} Y: #{y}"
+			#@ball.bounce(x, y)
+			@ball.bounce(self.to_x, self.to_y)
 			self.to_x = @ball.x()
 			self.to_y = @ball.y()
-
-			#self.to_x = (self.to_x + 10) % 100
-			#if x == 0 then
-			#	# TODO check collision leftPaddle
-			#	if (self.leftPaddle.pos - x).abs > self.leftPaddle.size then
-			#		#	change score
-			#		self.to_y = 50
-			#		self.to_x = 0
-			#		#@ball.reset
-			#	else
-			#		#@ball.bounce(x, y)
-			#	end
-			#elsif x == 100 then
-			#	# TODO check collision rightPaddle
-			#	if (self.rightPaddle.pos - x).abs > self.rightPaddle.size then
-			#		#change score
-			#		self.to_y = 50
-			#		self.to_x = 100
-			#		@ball.reset
-			#		#run.emit
-			#	else
-			#		#ball.bounce(x, y)
-			#	end
-			#else
-			#	# TODO ball.bounce(x, y)
-			#	#@ball.bounce(x, y)
-			#end
-			#if to_x == 100 then
-			#	self.to_x = 0
-			#else
-			#	self.to_x = 100
-			#end
-			#if to_y == 100 then
-			#	self.to_y = 0
-			#else
-			#	self.to_y = 100
-			#end
 			self.time = (x-self.to_x).abs * 40
+			puts "Count: #{self.count}"
 			runBall.emit
 		end
 
@@ -226,19 +216,11 @@ module Pong
 			self.to_x = 100 * Random.new.rand(0..1)
 			self.to_y = 50
 			self.time = 2000
-			self.ball = Ball.new 0, 50, self.to_x
+			self.ball = Ball.new 0, 50, self.to_x, self
 			runBall.emit
+			#self.leftPaddle.side = 2
+			#self.rightPaddle.side = -2
 		end
-		#def initialize
-		#	@left_paddle = Paddle.new(50, 30)
-		#	@right_paddle = Paddle.new(50, 30)
-		#	puts "Left: #{@left_paddle.size} #{@left_paddle.pos}"
-		#	puts "Right: #{@right_paddle.size} #{@right_paddle.pos}"
-		#end
-		#def run
-		#	@paddles << Thread.new
-		#	@paddles << Thread.new
-		#end
 	end
 end
 
