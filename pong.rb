@@ -12,7 +12,8 @@ module Pong
 		def initialize a, b, direction, frame
 			@steigung = a
 			@yachsenabschnitt= b
-			@direction = direction
+			@direction = direction #Richtung zu der Ball hingeht
+			
 			@frame = frame
 		end
 		def reset
@@ -22,16 +23,17 @@ module Pong
 		def time
 			# TODO const faktor zu x
 		end
-		def x
-			res = if 0 == @direction then
-				if 0 < @steigung then
-					-@yachsenabschnitt / @steigung
+		def x # Berechnung x-Wert des Balles neue Position mittels x=(y-yachsenabschnitt)/steigung
+			res = if 0 == @direction then #Res speichert Zwischenposition des x-Werts
+				#Ball bewegt sich nach links
+				if 0 < @steigung then  
+					(0-@yachsenabschnitt )/ @steigung 
 				elsif 0 == @steigung
 					0
-				else
-					(100 - @yachsenabschnitt) / @steigung
+				else # Steigung groeßer 0
+					(100 - @yachsenabschnitt) / @steigung 
 				end
-			else
+			else #Ball bewegt sich nach rechts
 				if 0 < @steigung then
 					(100 - @yachsenabschnitt) / @steigung
 				elsif 0 == @steigung then
@@ -40,7 +42,8 @@ module Pong
 					-@yachsenabschnitt/ @steigung
 				end
 			end
-			if res < 0 then
+			#Setzt X-Wert der neuen Position des Balles auf x-Wert des Spielfeldrands
+			if res < 0 then 
 				return 0
 			elsif res > 100
 				return 100
@@ -48,13 +51,14 @@ module Pong
 				return res
 			end
 		end
-		def y
+		def y #Berechnung Y-Wert der Position des Balles 
 			puts "#{@steigung} * #{x()} + #{@yachsenabschnitt} = #{x() * @steigung + @yachsenabschnitt}"
 			x() * @steigung + @yachsenabschnitt
+			#Problem: Rundungsfehler
 		end
 		def line
 		end
-		def bounce(x, y)
+		def bounce(x, y) #Überprüfe, was passieren soll, wenn Ball an einen Spielfeldrand ankommt
 			#change = if 0 == @direction then
 			#						@frame.leftPaddle.collision y
 			#				 else
@@ -64,20 +68,24 @@ module Pong
 			#	puts "reset"
 			#	change = 0
 			#end
-			if y.round == 0 then
+			
+			#Bisher nicht betrachtete Fall: Ball trifft genau an der Ecke auf
+			#Methode für Ball trifft nicht Schläger noch nicht implementiert
+			if y.round == 0 then #Spiegelung der Geraden an Y=0
 				@steigung = -@steigung
 				@yachsenabschnitt = - @yachsenabschnitt
 				# @direction = @direction
-			elsif y.round == 100 then
+			elsif y.round == 100 then #Spiegelung der Geraden an Y=100
 				@steigung = -@steigung
 				@yachsenabschnitt = 2*100 - @yachsenabschnitt
 				# @direction = @direction
-			elsif x.round == 0 then
+			elsif x.round == 0 then #Spiegelung der Geraden an X=0
 				# @yachsenabschnitt= @yachsenabschnitt
 				@steigung = -@steigung
-				@steigung += @frame.leftPaddle.collision y
+				@steigung += @frame.leftPaddle.collision y #Prüft, ob Ball den Schläger trifft, 
+				#Ergebnis von Collision: 0 wenn nicht trifft oder Wert, um den sich die Steigung ändert 
 				@direction = 100
-			elsif x.round == 100 then
+			elsif x.round == 100 then #Spiegelung der Geraden an X=100
 				@yachsenabschnitt = (2 * y) - @yachsenabschnitt
 				@steigung = -@steigung
 				@steigung += @frame.rightPaddle.collision y
@@ -95,33 +103,33 @@ module Pong
 		include QML::Access
 		register_to_qml
 
-		property(:pos) { 50 }
-		property(:size) { 15 }
+		property(:pos) { 50 } #Startposition von der Mitte des Schlägers (Y-Wert)
+		property(:size) { 15 } #Höhe des Schlägers ausgehend von der Mitte bis zum Rand
 		property(:side) { 0 }
 
 		signal :move, []
 
 		@@step = 1
 
-		def initialize
+		def initialize #Konstruktor
 			puts "Paddle.new"
 			@mutex ||= Mutex.new
 		end
-		def collision y
+		def collision y #Überprüft, ob Schläger getroffen wurde, Rückgabewert: float (später float oder nil)
 			puts "collision #{y} (size: #{self.size})"
 			diff = y - pos
 			if diff.abs > self.size then
 				#return nil
 				puts "score"
-				return 0
+				return 0 #Schläger nicht getroffen
 			#elsif diff < 0 then
 			elsif 0 == diff then
 				return 0
 			else
-				return self.side * diff/self.size
+				return self.side * diff/self.size #Wert zwischen 0 und 2, zusätzliche Beschleunigung (addiert Wert auf Steigung)
 			end
 		end
-		def up
+		def up #Bewegung vom Schläger anschaulich nach unten
 			@movement = :up
 			unless @mutex.locked?
 				Thread.new do
@@ -139,7 +147,7 @@ module Pong
 			end
 			0
 		end
-		def down
+		def down #Bewegung vom Schläger anschaulich nach oben
 			@movement = :down
 			unless @mutex.locked?
 				Thread.new do
@@ -162,7 +170,7 @@ module Pong
 		end
 	end
 
-	class Frame
+	class Frame # 0-Punkt des Spielfeldes oben links mit positiven Achsen nach unten und rechts
 		include QML::Access
 		register_to_qml
 		@right = 100
@@ -195,7 +203,8 @@ module Pong
 			puts "stoped"
 		end
 
-		def bounce x, y
+		def bounce x, y #Wird von Grafik aufgerufen, wenn Animation fertig. 
+		# Berechnet Zeit, wie lange die Animation braucht, bis zum nächsten Aufprall
 			if @last_x == x and @last_y == y then
 				return
 			end
@@ -204,20 +213,20 @@ module Pong
 			#puts "X: #{x} Y: #{y} Win: #{self.width}x#{self.height}"
 			#puts "X: #{x} Y: #{y}"
 			#@ball.bounce(x, y)
-			@ball.bounce(self.to_x, self.to_y)
+			@ball.bounce(self.to_x, self.to_y) 
 			self.to_x = @ball.x()
 			self.to_y = @ball.y()
 			self.time = (x-self.to_x).abs * 40
 			puts "Count: #{self.count}"
-			runBall.emit
+			runBall.emit # Teilt GUI mit, dass Animation für Ball neu gestartet werden soll
 		end
 
-		def initialize
-			self.to_x = 100 * Random.new.rand(0..1)
-			self.to_y = 50
-			self.time = 2000
-			self.ball = Ball.new 0, 50, self.to_x, self
-			runBall.emit
+		def initialize #Konstruktor
+			self.to_x = 100 * Random.new.rand(0..1) # Setzt zufällig die Richtung des Balles beim Start fest
+			self.to_y = 50 #Ball bewegt sich als erstes waagerecht
+			self.time = 2000 #Erzeugt Zeit, die benötigt wird, bis Ball auf Spielfeldrand auftrifft
+			self.ball = Ball.new 0, 50, self.to_x, self #Instanz eines Balles
+			runBall.emit #Startet Animation von Ball, funktioniert aber nicht...
 			#self.leftPaddle.side = 2
 			#self.rightPaddle.side = -2
 		end
