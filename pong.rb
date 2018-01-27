@@ -10,34 +10,34 @@ module Pong
 		#include QML::Access
 		#register_to_qml
 		def initialize a, b, direction, frame
-			@a = a
-			@b = b
+			@steigung = a
+			@yachsenabschnit= b
 			@direction = direction
 			@frame = frame
 		end
 		def reset
-			@a = 0
-			@b = 50
+			@steigung = 0
+			@yachsenabschnit= 50
 		end
 		def time
 			# TODO const faktor zu x
 		end
 		def x
 			res = if 0 == @direction then
-				if 0 < @a then
-					-@b / @a
-				elsif 0 == @a
+				if 0 < @steigung then
+					-@yachsenabschnit/ @steigung
+				elsif 0 == @steigung
 					0
 				else
-					(100 - @b) / @a
+					(100 - @yachsenabschnit) / @steigung
 				end
 			else
-				if 0 < @a then
-					(100 - @b) / @a
-				elsif 0 == @a then
+				if 0 < @steigung then
+					(100 - @yachsenabschnit) / @steigung
+				elsif 0 == @steigung then
 					100
 				else
-					-@b / @a
+					-@yachsenabschnit/ @steigung
 				end
 			end
 			if res < 0 then
@@ -49,8 +49,8 @@ module Pong
 			end
 		end
 		def y
-			puts "#{@a} * #{x()} + #{@b} = #{x() * @a + @b}"
-			x() * @a + @b
+			puts "#{@steigung} * #{x()} + #{@yachsenabschnit} = #{x() * @steigung + @yachsenabschnit}"
+			x() * @steigung + @yachsenabschnit
 		end
 		def line
 		end
@@ -65,25 +65,25 @@ module Pong
 			#	change = 0
 			#end
 			if y.round == 0 then
-				@a = -@a
-				@b = -@b
+				@steigung = -@steigung
+				@yachsenabschnit = - @yachsenabschnit
 				# @direction = @direction
 			elsif y.round == 100 then
-				@a = -@a
-				@b = 2*100 - @b
+				@steigung = -@steigung
+				@yachsenabschnit = 2*100 - @yachsenabschnit
 				# @direction = @direction
 			elsif x.round == 0 then
-				# @b = @b
-				@a = -@a
-				@a += @frame.leftPaddle.collision y
+				# @yachsenabschnit= @yachsenabschnit
+				@steigung = -@steigung
+				@steigung += @frame.leftPaddle.collision y
 				@direction = 100
 			elsif x.round == 100 then
-				@b = (2 * y) - @b
-				@a = -@a
-				@a += @frame.rightPaddle.collision y
+				@yachsenabschnit = (2 * y) - @yachsenabschnit
+				@steigung = -@steigung
+				@steigung += @frame.rightPaddle.collision y
 				@direction = 0
 			end
-			#@a += change
+			#@steigung += change
 			puts "Ball.bounce(#{x}, #{y})"
 		end
 	end
