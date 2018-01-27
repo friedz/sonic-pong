@@ -224,6 +224,6 @@ module Pong
 	end
 end
 
-#QML.run do |app|
-#	app.load_path Pathname(__FILE__) + '../pong.qml'
-#end
+QML.run do |app|
+	app.load_path Pathname(__FILE__) + '../pong.qml'
+end
