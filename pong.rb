@@ -11,13 +11,13 @@ module Pong
 		#register_to_qml
 		def initialize a, b, direction, frame
 			@steigung = a
-			@yachsenabschnit= b
+			@yachsenabschnitt= b
 			@direction = direction
 			@frame = frame
 		end
 		def reset
 			@steigung = 0
-			@yachsenabschnit= 50
+			@yachsenabschnitt = 50
 		end
 		def time
 			# TODO const faktor zu x
@@ -25,19 +25,19 @@ module Pong
 		def x
 			res = if 0 == @direction then
 				if 0 < @steigung then
-					-@yachsenabschnit/ @steigung
+					-@yachsenabschnitt / @steigung
 				elsif 0 == @steigung
 					0
 				else
-					(100 - @yachsenabschnit) / @steigung
+					(100 - @yachsenabschnitt) / @steigung
 				end
 			else
 				if 0 < @steigung then
-					(100 - @yachsenabschnit) / @steigung
+					(100 - @yachsenabschnitt) / @steigung
 				elsif 0 == @steigung then
 					100
 				else
-					-@yachsenabschnit/ @steigung
+					-@yachsenabschnitt/ @steigung
 				end
 			end
 			if res < 0 then
@@ -49,8 +49,8 @@ module Pong
 			end
 		end
 		def y
-			puts "#{@steigung} * #{x()} + #{@yachsenabschnit} = #{x() * @steigung + @yachsenabschnit}"
-			x() * @steigung + @yachsenabschnit
+			puts "#{@steigung} * #{x()} + #{@yachsenabschnitt} = #{x() * @steigung + @yachsenabschnitt}"
+			x() * @steigung + @yachsenabschnitt
 		end
 		def line
 		end
@@ -66,19 +66,19 @@ module Pong
 			#end
 			if y.round == 0 then
 				@steigung = -@steigung
-				@yachsenabschnit = - @yachsenabschnit
+				@yachsenabschnitt = - @yachsenabschnitt
 				# @direction = @direction
 			elsif y.round == 100 then
 				@steigung = -@steigung
-				@yachsenabschnit = 2*100 - @yachsenabschnit
+				@yachsenabschnitt = 2*100 - @yachsenabschnitt
 				# @direction = @direction
 			elsif x.round == 0 then
-				# @yachsenabschnit= @yachsenabschnit
+				# @yachsenabschnitt= @yachsenabschnitt
 				@steigung = -@steigung
 				@steigung += @frame.leftPaddle.collision y
 				@direction = 100
 			elsif x.round == 100 then
-				@yachsenabschnit = (2 * y) - @yachsenabschnit
+				@yachsenabschnitt = (2 * y) - @yachsenabschnitt
 				@steigung = -@steigung
 				@steigung += @frame.rightPaddle.collision y
 				@direction = 0
@@ -224,6 +224,6 @@ module Pong
 	end
 end
 
-QML.run do |app|
-	app.load_path Pathname(__FILE__) + '../pong.qml'
-end
+#QML.run do |app|
+#	app.load_path Pathname(__FILE__) + '../pong.qml'
+#end
