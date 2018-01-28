@@ -14,6 +14,7 @@ module Pong
 			@yachsenabschnitt= b
 			@direction = direction
 			@frame = frame
+
 		end
 		def reset
 			@steigung = 0
@@ -50,7 +51,14 @@ module Pong
 		end
 		def y
 			puts "#{@steigung} * #{x()} + #{@yachsenabschnitt} = #{x() * @steigung + @yachsenabschnitt}"
-			x() * @steigung + @yachsenabschnitt
+			res = x() * @steigung + @yachsenabschnitt
+			if res > 100 then
+				return 100
+			elsif res < 0 then
+				return 0
+			else
+				return res
+			end
 		end
 		def line
 		end
@@ -66,21 +74,25 @@ module Pong
 			#end
 			if y.round == 0 then
 				@steigung = -@steigung
-				@yachsenabschnitt = - @yachsenabschnitt
+				@yachsenabschnitt = -@yachsenabschnitt
 				# @direction = @direction
 			elsif y.round == 100 then
 				@steigung = -@steigung
 				@yachsenabschnitt = 2*100 - @yachsenabschnitt
 				# @direction = @direction
 			elsif x.round == 0 then
-				# @yachsenabschnitt= @yachsenabschnitt
+				# @yachsenabschnitt = @yachsenabschnitt
 				@steigung = -@steigung
-				@steigung += @frame.leftPaddle.collision y
+				unless @frame.leftPaddle.collision(y).nil?
+					@steigung += @frame.leftPaddle.collision y
+				end
 				@direction = 100
 			elsif x.round == 100 then
 				@yachsenabschnitt = (2 * y) - @yachsenabschnitt
 				@steigung = -@steigung
-				@steigung += @frame.rightPaddle.collision y
+				unless @frame.rightPaddle.collision(y).nil?
+					@steigung += @frame.rightPaddle.collision y
+				end
 				@direction = 0
 			end
 			#@steigung += change
@@ -101,7 +113,8 @@ module Pong
 
 		signal :move, []
 
-		@@step = 1
+		@@step_size = 0.01
+		@@step_time = 0.0001
 
 		def initialize
 			puts "Paddle.new"
@@ -111,14 +124,19 @@ module Pong
 			puts "collision #{y} (size: #{self.size})"
 			diff = y - pos
 			if diff.abs > self.size then
-				#return nil
 				puts "score"
-				return 0
+				return nil
+				#return 0
 			#elsif diff < 0 then
 			elsif 0 == diff then
 				return 0
 			else
-				return self.side * diff/self.size
+				#return self.side * diff/self.size
+				if self.side < 0 then
+					return -1
+				else
+					return 1
+				end
 			end
 		end
 		def up
@@ -127,12 +145,12 @@ module Pong
 				Thread.new do
 					@mutex.synchronize  do
 						while (:up == @movement)
-							self.pos += @@step
+							self.pos += @@step_size
 							if self.pos >= 100
 								self.pos = 100
 							end
 							move.emit
-							sleep(0.1)
+							sleep(@@step_time)
 						end
 					end
 				end
@@ -145,12 +163,12 @@ module Pong
 				Thread.new do
 					@mutex.synchronize  do
 						while (:down == @movement)
-							self.pos -= @@step
+							self.pos -= @@step_size
 							if self.pos <= 0
 								self.pos = 0
 							end
 							move.emit
-							sleep(0.1)
+							sleep(@@step_time)
 						end
 					end
 				end
@@ -216,13 +234,18 @@ module Pong
 			self.to_x = 100 * Random.new.rand(0..1)
 			self.to_y = 50
 			self.time = 2000
-			self.ball = Ball.new 0, 50, self.to_x, self
+			@ball = Ball.new 0, 50, self.to_x, self
 			runBall.emit
 			#self.leftPaddle.side = 2
 			#self.rightPaddle.side = -2
 		end
 	end
 end
+
+#class Window
+#	include QML::Access
+#	register_to_qml
+#end
 
 QML.run do |app|
 	app.load_path Pathname(__FILE__) + '../pong.qml'
