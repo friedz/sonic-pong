@@ -1,14 +1,15 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
+import QtQuick.Window 2.2
 
 import Pong 1.0
 
 ApplicationWindow {
 	id: window
 	visible: true
-	width: 200
-	height: 200
+	width: Screen.desktopAvailableWidth * 0.8
+	height: Screen.desktopAvailableHeight * 0.8
 	title: "Pong"
 
 	function rel_to_abs_x(x) {
@@ -77,7 +78,8 @@ ApplicationWindow {
 		anchors.rightMargin: window.height/15
 		font.pointSize: window.height/5
 		font.family: "Bit5x3"
-		text: "97"
+		text: "0"
+		//text: frame.score_left
 	}
 	Text {
 		id: scoreRight
@@ -88,7 +90,8 @@ ApplicationWindow {
 		anchors.leftMargin: window.height/15
 		font.pointSize: window.height/5
 		font.family: "Bit5x3"
-		text: "2"
+		text: "0"
+		//text: frame.score_right
 	}
 	Rectangle {
 		id: ball
@@ -147,7 +150,7 @@ ApplicationWindow {
 		id: right
 		side: -1
 		pos: 50
-		size: 15
+		size: 10
 		onMove: {
 			paddleRight.y = pos*(window.height/100) - paddleRight.height/2
 			moveBall.start()
@@ -157,7 +160,7 @@ ApplicationWindow {
 		id: left
 		side: 1
 		pos: 50
-		size: 15
+		size: 10
 		onMove: {
 			paddleLeft.y = pos*(window.height/100) - paddleLeft.height/2
 			moveBall.start()
@@ -174,6 +177,12 @@ ApplicationWindow {
 			//ball.y = rel_to_abs_y(50)
 			moveBall.start()
 			count = count + 1
+		}
+		onResetBall: {
+			ball.x = window.width/2 - ball.width/2
+			ball.y = window.height/2 - ball.width/2
+			scoreRight.text = right_score()
+			scoreLeft.text = left_score()
 		}
 	}
 }
