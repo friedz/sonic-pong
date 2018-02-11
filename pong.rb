@@ -10,29 +10,34 @@ module Pong
 		attr_reader :steigung, :yachsenabschnitt
 		#include QML::Access
 		#register_to_qml
+		attr_reader :currentVector
 		def initialize a, b, direction, frame
 			@steigung = a
-			@yachsenabschnitt= b
+			@yachsenabschnitt = b
 			@direction = direction #Richtung zu der Ball hingeht
-
+      
 			@frame = frame
-
+			#Vektor fuer Uebergabe an playSound() in frame
+			@currentVector = [@steigung, @yachsenabschnitt, @direction]
 		end
 		def reset
 			@steigung = 0
 			@yachsenabschnitt = 50
+			@currentVector[0] = @steigung
+			@currentVector[1] = @yachsenabschnitt			
 		end
 		def time
 			# TODO const faktor zu x
 		end
 		def x # Berechnung x-Wert des Balles neue Position mittels x=(y-yachsenabschnitt)/steigung
 			res = if 0 == @direction then #Res speichert Zwischenposition des x-Werts
-				# Ball bewegt sich nach links
+
+				#Ball bewegt sich nach links
 				if 0 < @steigung then
-					(0-@yachsenabschnitt )/ @steigung
+					(0 - @yachsenabschnitt ) / @steigung
 				elsif 0 == @steigung
 					0
-				else # Steigung groeßer 0
+				else # Steigung groesser 0
 					(100 - @yachsenabschnitt) / @steigung
 				end
 			else #Ball bewegt sich nach rechts
@@ -118,6 +123,7 @@ module Pong
 	end
 
 	class Paddle
+		# attr_reader creates getter/setter methods (here called size and pos) which in turn create instance variables called @size and @pos
 		attr_accessor :size, :pos
 		#attr_accessor :side
 
@@ -206,6 +212,7 @@ module Pong
 		@left = 0
 		attr_accessor :left_paddle, :right_paddle
 
+		# property() setzt Dinge, die dann in QML verfügbar sind
 		property(:leftPaddle) { Paddle }
 		property(:rightPaddle) { Paddle }
 		property(:ball) { Ball }
@@ -250,6 +257,29 @@ module Pong
 		end
 		def left_score
 			return @score_left
+    end
+
+		# TODO ----------------------------------------------------------
+		# playSound() besorgt sich, durch QML getriggert, aktiv
+		# ball.currentVector
+		# und loest das Abspielen des Sounds über die Shell aus.
+		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit
+		# QML kommuniziert.
+		def playSound()
+			puts "\n playSound called" # Debugging-Output
+			spawn 'sonic_pi play 50'
+			puts "\n" + currentVector = ball.currentVector.to_s
+
+			# startSound nach aufprall = aktueller sound (oben)
+			# soll sich ändern nach neuer (x,y)-Wert aus x(), y()
+			# über berechnete Zeit <- return-wert bounce(x,y)?
+
+
+
+			#puts self.ball.currentVector.to_s
+			#puts '\ncurrentVector acquired'
+			# dummyFunctionInScrubyCode(currentVector)
+			# puts '\ncurrentVector pushed to scruby-function'
 		end
 
 		def bounce x, y #Wird von Grafik aufgerufen, wenn Animation fertig.
@@ -267,6 +297,8 @@ module Pong
 			self.to_y = @ball.y()
 			self.time = (@last_x-self.to_x).abs * 40
 			puts "Count: #{self.count}"
+			#Vektor setzen
+
 			runBall.emit # Teilt GUI mit, dass Animation für Ball neu gestartet werden soll
 			puts "X: #{x} Y: #{y} Steigung: #{ball.steigung}, Y-Achse: #{ball.yachsenabschnitt}, to_X: #{to_x}, to_Y: #{to_y}"
 		end
