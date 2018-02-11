@@ -7,8 +7,8 @@ import Pong 1.0
 ApplicationWindow {
 	id: window
 	visible: true
-	width: 200
-	height: 200
+	width: Screen.desktopAvailableWidth * 0.8
+	height: Screen.desktopAvailableHeight * 0.8
 	title: "Pong"
 
 	function rel_to_abs_x(x) {
