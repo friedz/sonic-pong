@@ -9,6 +9,7 @@ module Pong
 	class Ball
 		#include QML::Access
 		#register_to_qml
+		attr_reader :currentVector
 		def initialize a, b, direction, frame
 			@steigung = a
 			@yachsenabschnitt = b
@@ -21,6 +22,8 @@ module Pong
 		def reset
 			@steigung = 0
 			@yachsenabschnitt = 50
+			@currentVector[0] = @steigung
+			@currentVector[1] = @yachsenabschnitt			
 		end
 		def time
 			# TODO const faktor zu x
@@ -29,7 +32,7 @@ module Pong
 			res = if 0 == @direction then #Res speichert Zwischenposition des x-Werts
 				#Ball bewegt sich nach links
 				if 0 < @steigung then
-					(0-@yachsenabschnitt ) / @steigung
+					(0 - @yachsenabschnitt ) / @steigung
 				elsif 0 == @steigung
 					0
 				else # Steigung groesser 0
@@ -224,16 +227,24 @@ module Pong
 			puts "stoped"
 		end
 
-		# TODO
+		# TODO ----------------------------------------------------------
 		# playSound() besorgt sich, durch QML getriggert, aktiv
 		# ball.currentVector
 		# und loest das Abspielen des Sounds über die Shell aus.
 		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit
 		# QML kommuniziert.
 		def playSound()
+			puts "\n playSound called" # Debugging-Output
 			spawn 'sonic_pi play 50'
-			#puts '\nplaySound called'
-			#self.currentVector = self.ball.currentVector
+			puts "\n" + currentVector = ball.currentVector.to_s
+
+			# startSound nach aufprall = aktueller sound (oben)
+			# soll sich ändern nach neuer (x,y)-Wert aus x(), y()
+			# über berechnete Zeit <- return-wert bounce(x,y)?
+
+
+
+			#puts self.ball.currentVector.to_s
 			#puts '\ncurrentVector acquired'
 			# dummyFunctionInScrubyCode(currentVector)
 			# puts '\ncurrentVector pushed to scruby-function'
