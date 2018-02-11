@@ -278,6 +278,8 @@ module Pong
 			self.ball = Ball.new 0, 50, self.to_x, self #Instanz eines Balles
 			@score_left = 0
 			@score_right = 0
+			@last_x = 50
+			@last_y = 50
 			runBall.emit #Startet Animation von Ball, funktioniert aber nicht...
 			#self.leftPaddle.side = 2
 			#self.rightPaddle.side = -2
