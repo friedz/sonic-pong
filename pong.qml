@@ -78,7 +78,8 @@ ApplicationWindow {
 		anchors.rightMargin: window.height/15
 		font.pointSize: window.height/5
 		font.family: "Bit5x3"
-		text: "97"
+		text: "0"
+		//text: frame.score_left
 	}
 	Text {
 		id: scoreRight
@@ -89,7 +90,8 @@ ApplicationWindow {
 		anchors.leftMargin: window.height/15
 		font.pointSize: window.height/5
 		font.family: "Bit5x3"
-		text: "2"
+		text: "0"
+		//text: frame.score_right
 	}
 	Rectangle {
 		id: ball
@@ -144,7 +146,7 @@ ApplicationWindow {
 		id: right
 		side: -1
 		pos: 50
-		size: 15
+		size: 10
 		onMove: {
 			paddleRight.y = pos*(window.height/100) - paddleRight.height/2
 			moveBall.start()
@@ -154,7 +156,7 @@ ApplicationWindow {
 		id: left
 		side: 1
 		pos: 50
-		size: 15
+		size: 10
 		onMove: {
 			paddleLeft.y = pos*(window.height/100) - paddleLeft.height/2
 			moveBall.start()
@@ -171,6 +173,12 @@ ApplicationWindow {
 			//ball.y = rel_to_abs_y(50)
 			moveBall.start()
 			count = count + 1
+		}
+		onResetBall: {
+			ball.x = window.width/2 - ball.width/2
+			ball.y = window.height/2 - ball.width/2
+			scoreRight.text = right_score()
+			scoreLeft.text = left_score()
 		}
 	}
 }
