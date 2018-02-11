@@ -6,6 +6,22 @@ module Pong
 	VERSION = "1.0"
 	include QML::Access
 
+=begin ### Eigene Vector-Klasse
+	class Vector
+		# initialisiere mit Parametern Steigung, Y-Achsenabschnitt und Richtung
+		def initialize(gradient, y_intercept, direction) #Konstruktor
+			@gradient = gradient
+			@y_intercept = y_intercept
+			@direction = direction
+		end
+		def playSound
+			#TODO call scruby function here to play sound representation of current vector
+			puts '\nVector.playSound(currentVector[]) called\n'
+		end
+		attr_accessor :currentVector
+	end
+=end
+
 	class Ball
 		#include QML::Access
 		#register_to_qml
@@ -16,6 +32,12 @@ module Pong
 
 			@frame = frame
 
+			@currentVector = [@steigung, @yachsenabschnitt, @direction]
+
+=begin ### Eigene Vector-Klasse
+			# Frame instanziert Ball instanziert Vector
+			@vector = Vector.new(@steigung, @yachsenabschnitt, @direction)
+=end
 		end
 		def reset
 			@steigung = 0
@@ -196,6 +218,7 @@ module Pong
 		@left = 0
 		attr_accessor :left_paddle, :right_paddle
 
+		# property() setzt Dinge, die dann in QML verfügbar sind
 		property(:leftPaddle) { Paddle }
 		property(:rightPaddle) { Paddle }
 		property(:ball) { Ball }
@@ -222,6 +245,15 @@ module Pong
 			puts "stoped"
 		end
 
+		# TODO
+		# playSound() soll sich durch QML getriggert aktiv ball.currentVector
+		# besorgen und das Abspielen des Sounds in scruby ausloesen.
+		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit QML
+		# kommuniziert.
+		def playSound()
+			puts 'playSound called'
+		end
+
 		def bounce x, y #Wird von Grafik aufgerufen, wenn Animation fertig.
 		# Berechnet Zeit, wie lange die Animation braucht, bis zum nächsten Aufprall
 			if @last_x == x and @last_y == y then
@@ -237,6 +269,8 @@ module Pong
 			self.to_y = @ball.y()
 			self.time = (x-self.to_x).abs * 40
 			puts "Count: #{self.count}"
+			#Vektor setzen
+
 			runBall.emit # Teilt GUI mit, dass Animation für Ball neu gestartet werden soll
 		end
 

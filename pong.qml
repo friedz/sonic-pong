@@ -26,7 +26,7 @@ ApplicationWindow {
 	}
 	function abs_to_rel_y(y) {
 		var height = window.height - ball.height
-		return y * 100/height 
+		return y * 100/height
 	}
 
 	Rectangle {
@@ -113,6 +113,10 @@ ApplicationWindow {
 				duration: frame.time
 			}
 			onRunningChanged: {
+				//Start-Event ruft Methode in pong.rb auf
+				if (moveBall.running) {
+					frame.playSound()
+				}
 				if (!moveBall.running) {
 					frame.stoped()
 					frame.bounce(abs_to_rel_x(ball.x), abs_to_rel_y(ball.y))
