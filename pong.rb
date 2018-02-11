@@ -13,7 +13,7 @@ module Pong
 			@steigung = a
 			@yachsenabschnitt= b
 			@direction = direction #Richtung zu der Ball hingeht
-			
+
 			@frame = frame
 
 		end
@@ -26,13 +26,13 @@ module Pong
 		end
 		def x # Berechnung x-Wert des Balles neue Position mittels x=(y-yachsenabschnitt)/steigung
 			res = if 0 == @direction then #Res speichert Zwischenposition des x-Werts
-				#Ball bewegt sich nach links
-				if 0 < @steigung then  
-					(0-@yachsenabschnitt )/ @steigung 
+				# Ball bewegt sich nach links
+				if 0 < @steigung then
+					(0-@yachsenabschnitt )/ @steigung
 				elsif 0 == @steigung
 					0
 				else # Steigung groeßer 0
-					(100 - @yachsenabschnitt) / @steigung 
+					(100 - @yachsenabschnitt) / @steigung
 				end
 			else #Ball bewegt sich nach rechts
 				if 0 < @steigung then
@@ -44,7 +44,7 @@ module Pong
 				end
 			end
 			#Setzt X-Wert der neuen Position des Balles auf x-Wert des Spielfeldrands
-			if res < 0 then 
+			if res < 0 then
 				return 0
 			elsif res > 100
 				return 100
@@ -52,7 +52,7 @@ module Pong
 				return res
 			end
 		end
-		def y #Berechnung Y-Wert der Position des Balles 
+		def y #Berechnung Y-Wert der Position des Balles
 			puts "#{@steigung} * #{x()} + #{@yachsenabschnitt} = #{x() * @steigung + @yachsenabschnitt}"
 			res = x() * @steigung + @yachsenabschnitt
 			if res > 100 then
@@ -221,7 +221,7 @@ module Pong
 			puts "stoped"
 		end
 
-		def bounce x, y #Wird von Grafik aufgerufen, wenn Animation fertig. 
+		def bounce x, y #Wird von Grafik aufgerufen, wenn Animation fertig.
 		# Berechnet Zeit, wie lange die Animation braucht, bis zum nächsten Aufprall
 			if @last_x == x and @last_y == y then
 				return
@@ -231,7 +231,7 @@ module Pong
 			#puts "X: #{x} Y: #{y} Win: #{self.width}x#{self.height}"
 			#puts "X: #{x} Y: #{y}"
 			#@ball.bounce(x, y)
-			@ball.bounce(self.to_x, self.to_y) 
+			@ball.bounce(self.to_x, self.to_y)
 			self.to_x = @ball.x()
 			self.to_y = @ball.y()
 			self.time = (x-self.to_x).abs * 40

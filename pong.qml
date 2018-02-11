@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
+import QtQuick.Window 2.2
 
 import Pong 1.0
 
@@ -26,7 +27,7 @@ ApplicationWindow {
 	}
 	function abs_to_rel_y(y) {
 		var height = window.height - ball.height
-		return y * 100/height 
+		return y * 100/height
 	}
 
 	Rectangle {
