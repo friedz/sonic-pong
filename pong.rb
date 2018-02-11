@@ -15,9 +15,8 @@ module Pong
 			@direction = direction #Richtung zu der Ball hingeht
 
 			@frame = frame
-
+			#Vektor fuer Uebergabe an playSound() in frame
 			@currentVector = [@steigung, @yachsenabschnitt, @direction]
-
 		end
 		def reset
 			@steigung = 0
@@ -231,9 +230,10 @@ module Pong
 		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit QML
 		# kommuniziert.
 		def playSound()
-			puts '\nplaySound called'
-			self.currentVector = self.ball.currentVector
-			puts '\ncurrentVector acquired'
+			spawn 'sonic_pi play 50'
+			#puts '\nplaySound called'
+			#self.currentVector = self.ball.currentVector
+			#puts '\ncurrentVector acquired'
 			# dummyFunctionInScrubyCode(currentVector)
 			# puts '\ncurrentVector pushed to scruby-function'
 		end
