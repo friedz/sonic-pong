@@ -251,7 +251,11 @@ module Pong
 		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit QML
 		# kommuniziert.
 		def playSound()
-			puts 'playSound called'
+			puts '\nplaySound called'
+			self.currentVector = self.ball.currentVector
+			puts '\ncurrentVector acquired'
+			# dummyFunctionInScrubyCode(currentVector)
+			# puts '\ncurrentVector pushed to scruby-function'
 		end
 
 		def bounce x, y #Wird von Grafik aufgerufen, wenn Animation fertig.
