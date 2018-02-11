@@ -118,7 +118,7 @@ module Pong
 	end
 
 	class Paddle
-		attr_reader :size, :pos
+		attr_accessor :size, :pos
 		#attr_accessor :side
 
 		include QML::Access
@@ -285,6 +285,8 @@ module Pong
 	end
 end
 
-QML.run do |app|
-	app.load_path Pathname(__FILE__) + '../pong.qml'
+if __FILE__ == $0 then
+	QML.run do |app|
+		app.load_path Pathname(__FILE__) + '../pong.qml'
+	end
 end
