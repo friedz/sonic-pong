@@ -6,22 +6,6 @@ module Pong
 	VERSION = "1.0"
 	include QML::Access
 
-=begin ### Eigene Vector-Klasse
-	class Vector
-		# initialisiere mit Parametern Steigung, Y-Achsenabschnitt und Richtung
-		def initialize(gradient, y_intercept, direction) #Konstruktor
-			@gradient = gradient
-			@y_intercept = y_intercept
-			@direction = direction
-		end
-		def playSound
-			#TODO call scruby function here to play sound representation of current vector
-			puts '\nVector.playSound(currentVector[]) called\n'
-		end
-		attr_accessor :currentVector
-	end
-=end
-
 	class Ball
 		#include QML::Access
 		#register_to_qml
@@ -34,10 +18,6 @@ module Pong
 
 			@currentVector = [@steigung, @yachsenabschnitt, @direction]
 
-=begin ### Eigene Vector-Klasse
-			# Frame instanziert Ball instanziert Vector
-			@vector = Vector.new(@steigung, @yachsenabschnitt, @direction)
-=end
 		end
 		def reset
 			@steigung = 0
