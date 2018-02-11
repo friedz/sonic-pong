@@ -225,10 +225,11 @@ module Pong
 		end
 
 		# TODO
-		# playSound() soll sich durch QML getriggert aktiv ball.currentVector
-		# besorgen und das Abspielen des Sounds in scruby ausloesen.
-		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit QML
-		# kommuniziert.
+		# playSound() besorgt sich, durch QML getriggert, aktiv
+		# ball.currentVector
+		# und loest das Abspielen des Sounds über die Shell aus.
+		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit
+		# QML kommuniziert.
 		def playSound()
 			spawn 'sonic_pi play 50'
 			#puts '\nplaySound called'
