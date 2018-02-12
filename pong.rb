@@ -1,6 +1,9 @@
 #!/usr/bin/env ruby
 
 require 'qml'
+require File.dirname(__FILE__) + '/sc/dispatcher.rb'
+
+$d = SC::Dispatcher.new
 
 module Pong
 	VERSION = "1.0"
@@ -257,6 +260,7 @@ module Pong
 			if @last_x == x and @last_y == y then
 				return
 			end
+			$d.interpret_silent("~pong = { SinOsc.ar(Linen.kr(150, 10, 500, 0)).dup };")
 			@last_x = x
 			@last_y = y
 			#puts "X: #{x} Y: #{y} Win: #{self.width}x#{self.height}"
@@ -287,8 +291,17 @@ module Pong
 	end
 end
 
+#at_exit do
+#	$d.interpret_silent("~pong.stop;")
+#end
+
 if __FILE__ == $0 then
+	$d.interpret_silent("s.boot;")
+	$d.interpret_silent("p = ProxySpace.push(s);")
+	$d.interpret_silent("~pong.play;")
 	QML.run do |app|
 		app.load_path Pathname(__FILE__) + '../pong.qml'
 	end
+	$d.interpret_silent("~pong.stop;")
+	puts "end"
 end
