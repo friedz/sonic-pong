@@ -116,6 +116,9 @@ ApplicationWindow {
 				duration: frame.time
 			}
 			onRunningChanged: {
+				if (moveBall.running) {
+					frame.sound()
+				}
 				if (!moveBall.running) {
 					frame.stoped()
 					frame.bounce(abs_to_rel_x(ball.x), abs_to_rel_y(ball.y))
