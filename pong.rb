@@ -7,13 +7,15 @@ module Pong
 	include QML::Access
 
 	class Ball
+		attr_reader :steigung, :yachsenabschnitt
 		#include QML::Access
 		#register_to_qml
+		attr_reader :currentVector
 		def initialize a, b, direction, frame
 			@steigung = a
 			@yachsenabschnitt = b
 			@direction = direction #Richtung zu der Ball hingeht
-
+      
 			@frame = frame
 			#Vektor fuer Uebergabe an playSound() in frame
 			@currentVector = [@steigung, @yachsenabschnitt, @direction]
@@ -21,15 +23,18 @@ module Pong
 		def reset
 			@steigung = 0
 			@yachsenabschnitt = 50
+			@currentVector[0] = @steigung
+			@currentVector[1] = @yachsenabschnitt			
 		end
 		def time
 			# TODO const faktor zu x
 		end
 		def x # Berechnung x-Wert des Balles neue Position mittels x=(y-yachsenabschnitt)/steigung
 			res = if 0 == @direction then #Res speichert Zwischenposition des x-Werts
+
 				#Ball bewegt sich nach links
 				if 0 < @steigung then
-					(0-@yachsenabschnitt ) / @steigung
+					(0 - @yachsenabschnitt ) / @steigung
 				elsif 0 == @steigung
 					0
 				else # Steigung groesser 0
@@ -46,12 +51,13 @@ module Pong
 			end
 			#Setzt X-Wert der neuen Position des Balles auf x-Wert des Spielfeldrands
 			if res < 0 then
-				return 0
+				@x = 0
 			elsif res > 100
-				return 100
+				@x = 100
 			else
-				return res
+				@x = res
 			end
+			return @x
 		end
 		def y #Berechnung Y-Wert der Position des Balles
 			puts "#{@steigung} * #{x()} + #{@yachsenabschnitt} = #{x() * @steigung + @yachsenabschnitt}"
@@ -79,7 +85,30 @@ module Pong
 
 			#Bisher nicht betrachtete Fall: Ball trifft genau an der Ecke auf
 			#Methode für Ball trifft nicht Schläger noch nicht implementiert
-			if y.round == 0 then #Spiegelung der Geraden an Y=0
+			if x.round == 0 then #Spiegelung der Geraden an X=0
+				# @yachsenabschnitt = @yachsenabschnitt
+				@steigung = -@steigung
+				unless @frame.leftPaddle.collision(y).nil?  #Prüft, ob Ball den Schläger trifft,
+					#Ergebnis von Collision: nil wenn nicht trifft oder Wert, um den sich die Steigung ändert
+					@steigung += @frame.leftPaddle.collision y
+				else
+					reset
+					@frame.score 0
+					return
+				end
+				@direction = 100
+			elsif x.round == 100 then #Spiegelung der Geraden an X=100
+				@steigung = -@steigung
+				unless @frame.rightPaddle.collision(y).nil?
+					@steigung += @frame.rightPaddle.collision y
+				else
+					reset
+					@frame.score 100
+					return
+				end
+				@yachsenabschnitt = y - @steigung * 100
+				@direction = 0
+			elsif y.round == 0 then #Spiegelung der Geraden an Y=0
 				@steigung = -@steigung
 				@yachsenabschnitt = -@yachsenabschnitt
 				# @direction = @direction
@@ -87,21 +116,6 @@ module Pong
 				@steigung = -@steigung
 				@yachsenabschnitt = 2*100 - @yachsenabschnitt
 				# @direction = @direction
-			elsif x.round == 0 then #Spiegelung der Geraden an X=0
-				# @yachsenabschnitt = @yachsenabschnitt
-				@steigung = -@steigung
-				unless @frame.leftPaddle.collision(y).nil?  #Prüft, ob Ball den Schläger trifft,
-					#Ergebnis von Collision: nil wenn nicht trifft oder Wert, um den sich die Steigung ändert
-					@steigung += @frame.leftPaddle.collision y
-				end
-				@direction = 100
-			elsif x.round == 100 then #Spiegelung der Geraden an X=100
-				@yachsenabschnitt = (2 * y) - @yachsenabschnitt
-				@steigung = -@steigung
-				unless @frame.rightPaddle.collision(y).nil?
-					@steigung += @frame.rightPaddle.collision y
-				end
-				@direction = 0
 			end
 			#@steigung += change
 			puts "Ball.bounce(#{x}, #{y})"
@@ -109,8 +123,8 @@ module Pong
 	end
 
 	class Paddle
-		# attr_reader creates getter methods (here called size and pos) which in turn create instance variables called @size and @pos
-		attr_reader :size, :pos
+		# attr_reader creates getter/setter methods (here called size and pos) which in turn create instance variables called @size and @pos
+		attr_accessor :size, :pos
 		#attr_accessor :side
 
 		include QML::Access
@@ -130,9 +144,9 @@ module Pong
 			@mutex ||= Mutex.new
 		end
 		def collision y #Überprüft, ob Schläger getroffen wurde, Rückgabewert: float (später float oder nil)
-			puts "collision #{y} (size: #{self.size})"
+			puts "collision #{y} (size: #{self.size}, pos: #{self.pos})"
 			diff = y - pos
-			if diff.abs > self.size then
+			if diff.abs > self.size + 1 then
 				# Schläger nicht getroffen
 				puts "score"
 				return nil
@@ -140,13 +154,14 @@ module Pong
 			elsif 0 == diff then
 				return 0
 			else # diff < 0
-				#return self.side * diff/self.size #Wert zwischen 0 und 2, zusätzliche Beschleunigung (addiert Wert auf Steigung)
+				#Wert zwischen 0 und 2, zusätzliche Beschleunigung (addiert Wert auf Steigung)
+				return self.side * diff/self.size #* (y>self.pos ? -1 : 1)
 				# zum debugen vereinfacht nur -1 oder 1
-				if self.side < 0 then
-					return -1
-				else
-					return 1
-				end
+				#if self.side < 0 then
+				#	return y > self.pos ? -1 : 1
+				#else
+				#	return y > self.pos ? 1 : -1
+				#end
 			end
 		end
 		def up #Bewegung vom Schläger anschaulich nach unten
@@ -209,13 +224,7 @@ module Pong
 		property(:count) { 0 }
 
 		signal :runBall, []
-
-		on_changed :leftPaddle do
-			puts "Left Paddle changed"
-		end
-		on_changed :rightPaddle do
-			puts "Right Paddle changed"
-		end
+		signal :resetBall, []
 
 		def change
 			puts "change"
@@ -224,16 +233,50 @@ module Pong
 			puts "stoped"
 		end
 
-		# TODO
+		def score direction
+			if 0 == direction then
+				puts "Right #{@score_right}    #{@score_right.class}"
+				#self.score_right = (self.score_right.to_i + 1).to_s
+				@score_right += 1
+			else
+				puts "Left #{@score_left}    #{@score_left.class}"
+				#self.score_left = (self.score_left.to_i + 1).to_s
+				@score_left += 1
+			end
+			@last_x = 50
+			@last_y = 50
+			self.to_y = 50
+			self.to_x = direction
+			self.time = 3000
+			resetBall.emit
+			runBall.emit
+		end
+
+		def right_score
+			return @score_right
+		end
+		def left_score
+			return @score_left
+    end
+
+		# TODO ----------------------------------------------------------
 		# playSound() besorgt sich, durch QML getriggert, aktiv
 		# ball.currentVector
 		# und loest das Abspielen des Sounds über die Shell aus.
 		# Die Funktion gehoert zu frame, weil aus Gruenden nur frame mit
 		# QML kommuniziert.
 		def playSound()
+			puts "\n playSound called" # Debugging-Output
 			spawn 'sonic_pi play 50'
-			#puts '\nplaySound called'
-			#self.currentVector = self.ball.currentVector
+			puts "\n" + currentVector = ball.currentVector.to_s
+
+			# startSound nach aufprall = aktueller sound (oben)
+			# soll sich ändern nach neuer (x,y)-Wert aus x(), y()
+			# über berechnete Zeit <- return-wert bounce(x,y)?
+
+
+
+			#puts self.ball.currentVector.to_s
 			#puts '\ncurrentVector acquired'
 			# dummyFunctionInScrubyCode(currentVector)
 			# puts '\ncurrentVector pushed to scruby-function'
@@ -252,11 +295,12 @@ module Pong
 			@ball.bounce(self.to_x, self.to_y)
 			self.to_x = @ball.x()
 			self.to_y = @ball.y()
-			self.time = (x-self.to_x).abs * 40
+			self.time = (@last_x-self.to_x).abs * 40
 			puts "Count: #{self.count}"
 			#Vektor setzen
 
 			runBall.emit # Teilt GUI mit, dass Animation für Ball neu gestartet werden soll
+			puts "X: #{x} Y: #{y} Steigung: #{ball.steigung}, Y-Achse: #{ball.yachsenabschnitt}, to_X: #{to_x}, to_Y: #{to_y}"
 		end
 
 		def initialize #Konstruktor
@@ -264,6 +308,10 @@ module Pong
 			self.to_y = 50 #Ball bewegt sich als erstes waagerecht
 			self.time = 2000 #Erzeugt Zeit, die benötigt wird, bis Ball auf Spielfeldrand auftrifft
 			self.ball = Ball.new 0, 50, self.to_x, self #Instanz eines Balles
+			@score_left = 0
+			@score_right = 0
+			@last_x = 50
+			@last_y = 50
 			runBall.emit #Startet Animation von Ball, funktioniert aber nicht...
 			#self.leftPaddle.side = 2
 			#self.rightPaddle.side = -2
@@ -271,6 +319,8 @@ module Pong
 	end
 end
 
-QML.run do |app|
-	app.load_path Pathname(__FILE__) + '../pong.qml'
+if __FILE__ == $0 then
+	QML.run do |app|
+		app.load_path Pathname(__FILE__) + '../pong.qml'
+	end
 end
