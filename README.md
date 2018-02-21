@@ -6,6 +6,7 @@ Linux
 SonicPong currently is a final project for a university course and is **still in its development phase**. It may or may not be maintained by us further after February 2018.
 
 ![Screenshot here.](/../gh-pages/sonic-pong.png?raw=true "Screenshot")
+[Video](/../gh-pages/screencast.mkv?raw=true) sadly without audio.
 
 # Yeah, but what exactly is the project?
 
