@@ -1,6 +1,43 @@
 #!/usr/bin/env ruby
 
 require 'qml'
+require File.dirname(__FILE__) + '/sc/dispatcher.rb'
+
+
+class Sound
+	def initialize
+		puts "New Sound"
+		@d = SC::Dispatcher.new
+		@d.interpret_silent("s.boot;")
+		@d.interpret_silent("p = ProxySpace.push(s);")
+		@d.interpret_silent("~x.play;")
+		@d.interpret_silent("~y.play;")
+		@d.interpret_silent("~pad.play;")
+		@d.interpret_silent("~pong.play;")
+		@d.interpret_silent("~pong = { Pan2.ar(PMOsc.ar(~x), ~y + ~pad) }")
+		puts "New Sound"
+	end
+	def bounce fx, fy, tx, ty, t
+		@d.interpret_silent("~x = { Line.ar(#{x_to_f fx}, #{x_to_f tx}, #{t_to_t t}) }")
+		@d.interpret_silent("~y = { Line.ar(#{y_to_s fy}, #{y_to_s ty}, #{t_to_t t}) }")
+	end
+	def change p
+		@d.interpret_silent("~pad = #{y_to_s p}")
+	end
+	def t_to_t t
+		return t/100.0
+	end
+	def x_to_f x
+		return x*6 + 200
+	end
+	def y_to_s y
+		return y/50.0 - 1
+	end
+	def stop
+		@d.interpret_silent("~pong.stop;")
+		@d.interpret_silent("s.quit")
+	end
+end
 
 module Pong
 	VERSION = "1.0"
@@ -287,6 +324,7 @@ module Pong
 			if @last_x == x and @last_y == y then
 				return
 			end
+			#$d.interpret_silent("~pong = { SinOsc.ar(Linen.kr(150, 10, 500, 0)).dup };")
 			@last_x = x
 			@last_y = y
 			#puts "X: #{x} Y: #{y} Win: #{self.width}x#{self.height}"
@@ -302,7 +340,15 @@ module Pong
 			runBall.emit # Teilt GUI mit, dass Animation für Ball neu gestartet werden soll
 			puts "X: #{x} Y: #{y} Steigung: #{ball.steigung}, Y-Achse: #{ball.yachsenabschnitt}, to_X: #{to_x}, to_Y: #{to_y}"
 		end
-
+		def sound
+			puts "Sound"
+			@audio.bounce @last_x, @last_y, @to_x, @to_y, @time
+			0
+		end
+		def move_pad pad
+			@audio.change pad
+			0
+		end
 		def initialize #Konstruktor
 			self.to_x = 100 * Random.new.rand(0..1) # Setzt zufällig die Richtung des Balles beim Start fest
 			self.to_y = 50 #Ball bewegt sich als erstes waagerecht
@@ -312,6 +358,7 @@ module Pong
 			@score_right = 0
 			@last_x = 50
 			@last_y = 50
+			@audio = Sound.new
 			runBall.emit #Startet Animation von Ball, funktioniert aber nicht...
 			#self.leftPaddle.side = 2
 			#self.rightPaddle.side = -2
@@ -319,8 +366,16 @@ module Pong
 	end
 end
 
+#at_exit do
+#	$d.interpret_silent("~pong.stop;")
+#end
+
 if __FILE__ == $0 then
+	#$d.interpret_silent("s.boot;")
+	#$d.interpret_silent("p = ProxySpace.push(s);")
+	#$d.interpret_silent("~pong.play;")
 	QML.run do |app|
 		app.load_path Pathname(__FILE__) + '../pong.qml'
 	end
+	puts "end"
 end

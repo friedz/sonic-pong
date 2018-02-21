@@ -116,9 +116,8 @@ ApplicationWindow {
 				duration: frame.time
 			}
 			onRunningChanged: {
-				//Start-Event ruft Methode in pong.rb auf
 				if (moveBall.running) {
-					frame.playSound()
+					frame.sound()
 				}
 				if (!moveBall.running) {
 					frame.stoped()
