@@ -8,10 +8,9 @@ class Sound
 	def initialize
 		puts "New Sound"
 		@d = SC::Dispatcher.new
+		#@d.interpret_silent("s.quit")
 		@d.interpret_silent("s.boot;")
 		@d.interpret_silent("p = ProxySpace.push(s);")
-		@d.interpret_silent("~x.play;")
-		@d.interpret_silent("~y.play;")
 		@d.interpret_silent("~pad.play;")
 		@d.interpret_silent("~pong.play;")
 		@d.interpret_silent("~pong = { Pan2.ar(PMOsc.ar(~x), ~y + ~pad) }")
@@ -20,6 +19,8 @@ class Sound
 	def bounce fx, fy, tx, ty, t
 		@d.interpret_silent("~x = { Line.ar(#{x_to_f fx}, #{x_to_f tx}, #{t_to_t t}) }")
 		@d.interpret_silent("~y = { Line.ar(#{y_to_s fy}, #{y_to_s ty}, #{t_to_t t}) }")
+		puts "~x = { Line.ar(#{x_to_f fx}, #{x_to_f tx}, #{t_to_t t}) }"
+		puts "~y = { Line.ar(#{y_to_s fy}, #{y_to_s ty}, #{t_to_t t}) }"
 	end
 	def change p
 		@d.interpret_silent("~pad = #{y_to_s p}")
@@ -374,8 +375,16 @@ if __FILE__ == $0 then
 	#$d.interpret_silent("s.boot;")
 	#$d.interpret_silent("p = ProxySpace.push(s);")
 	#$d.interpret_silent("~pong.play;")
+	#Thread.new {
+	#	SC::Pipe.serve
+	#}
+	#sleep(1)
 	QML.run do |app|
 		app.load_path Pathname(__FILE__) + '../pong.qml'
 	end
 	puts "end"
+	File.open(SC::Pipe.pid_loc, "r") do |file|
+		pid = file.read.chomp
+		Process.kill('INT', pid.to_i)
+	end
 end
