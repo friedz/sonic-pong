@@ -43,25 +43,10 @@ class Zutestendes
 end
 
 
-$beispiel=Zutestendes.new 	#0, 0, 0, 0
+$beispiel=Zutestendes.new 	
 $beispiel.variablensetzen(50, 50, 0, 50)
 
 class TestPong < Test::Unit::TestCase
-=begin
-	@ywert=$beispiel.instance_variable_get(:@test_y)
-	puts "ywert #{@ywert}"
-	@xwert=$beispiel.instance_variable_get(:@test_x)
-	puts "xwert #{@xwert}"
-	@yachsenabschnittwert=$beispiel.instance_variable_get(:@test_yachsenabschnitt)
-	puts "yachsenabschnitt #{@yachsenabschnittwert}"
-	@steigungwert=$beispiel.instance_variable_get(:@test_steigung)
-	puts "steigungwert #{@steigungwert}"
-	@collision=$beispiel.instance_variable_get(:@collisionresult)
-	puts "collision #{@collision}"
-	@collisionl=$beispiel.instance_variable_get(:@collisionresultl)
-	@scorer = $beispiel.instance_variable_get(:@scorerechts)
-	@scorel = $beispiel.instance_variable_get(:@scorelinks)
-=end
 
 
 	def test_x_wert_des_balles
@@ -113,11 +98,6 @@ class TestPong < Test::Unit::TestCase
 
 
 	def test_Ball_trifft_nicht_Paddel_rechts
-		if $beispiel.instance_variable_get(:@score)==nil
-			puts "score == nil "
-		elsif $beispiel.instance_variable_get(:@scorerechts)==nil
-			puts "scorer == nil "
-		end
 		#@score=$beispiel.instance_variable_get(:@scorerechts)
 		$beispiel.instance_variable_set(:@score, 1)
 		if $beispiel.instance_variable_get(:@collisionresult)==nil then
@@ -133,14 +113,44 @@ class TestPong < Test::Unit::TestCase
 		end
 	end
 
-=begin
+	def test_Ball_trifft_Rand_des_Paddels_links
+		@aktuelle_steigung=$beispiel.instance_variable_get(:@test_steigung)
+		if $beispiel.instance_variable_get(:@collisionresultl)!=0 and $beispiel.instance_variable_get(:@collisionresultl)!=nil then
+			assert_greater_and_equal_than($beispiel.instance_variable_get(:@test_steigung), $beispiel.instance_variable_get(:@aktuelle_steigung))
+		end
+	end
+
+
+
+	def test_Ball_trifft_nicht_Paddel_links
+		#@score=$beispiel.instance_variable_get(:@scorerechts)
+		$beispiel.instance_variable_set(:@score, 1)
+		if $beispiel.instance_variable_get(:@collisionresultl)==nil then
+
+			assert_equal($beispiel.instance_variable_get(:@scorelinks), $beispiel.instance_variable_get(:@scorelinks))
+		end
+	end
+
 
 	def test_Ball_trifft_oberen_Rand_des_Spielfeldes
-
+		@aktuelle_steigung=$beispiel.instance_variable_get(:@test_steigung)
+		@aktueller_yachsenabschnitt = $beispiel.instance_variable_get(:@test_yachsenabschnitt)
+		if $beispiel.instance_variable_get(:@test_x)==0 then
+			assert_equal($beispiel.instance_variable_get(:@test_steigung), -@aktuelle_steigung)
+			assert_equal($beispiel.instance_variable_get(:@test_yachsenabschnitt), -@aktueller_yachsenabschnitt)
+		end
 
 	end
+
 
 	def test_Ball_trifft_unteren_Rand_des_Spielfeldes
+		@aktuelle_steigung=$beispiel.instance_variable_get(:@test_steigung)
+		@aktueller_yachsenabschnitt = $beispiel.instance_variable_get(:@test_yachsenabschnitt)
+		if $beispiel.instance_variable_get(:@test_x)==100 then
+			assert_equal($beispiel.instance_variable_get(:@test_steigung), -@aktuelle_steigung)
+			assert_equal($beispiel.instance_variable_get(:@test_yachsenabschnitt), 2*100-@aktueller_yachsenabschnitt)
+		end
+
 	end
-=end
+
 end
